@@ -62,7 +62,34 @@ if ($LASTEXITCODE -eq 0) {
 Write-Host ""
 Write-Host "=== Build Complete ===" -ForegroundColor Cyan
 Write-Host ""
+# Build Renderer
+Write-Host "Building Renderer..." -ForegroundColor Green
+& go build -o bin\renderer.exe .\cmd\renderer 2>&1 | Tee-Object -Variable rendererOutput
+if ($LASTEXITCODE -eq 0) {
+    Write-Host "✓ Renderer binary created: bin\renderer.exe" -ForegroundColor Green
+} else {
+    Write-Host "✗ Renderer build failed" -ForegroundColor Red
+    Write-Host $rendererOutput -ForegroundColor Red
+    exit 1
+}
+
+Write-Host ""
+
+# Build Orchestrator
+Write-Host "Building Orchestrator..." -ForegroundColor Green
+& go build -o bin\orchestrator.exe .\cmd\orchestrator 2>&1 | Tee-Object -Variable orchestratorOutput
+if ($LASTEXITCODE -eq 0) {
+    Write-Host "✓ Orchestrator binary created: bin\orchestrator.exe" -ForegroundColor Green
+} else {
+    Write-Host "✗ Orchestrator build failed" -ForegroundColor Red
+    Write-Host $orchestratorOutput -ForegroundColor Red
+    exit 1
+}
+
+Write-Host ""
+Write-Host "=== Build Complete ===" -ForegroundColor Cyan
+Write-Host ""
 Write-Host "Run the cluster with:" -ForegroundColor Yellow
-Write-Host "  Manager: .\bin\manager.exe" -ForegroundColor Gray
-Write-Host "  Worker: .\bin\worker.exe --id worker-1 --port 8081" -ForegroundColor Gray
-Write-Host "  Client:  .\bin\client.exe --command 'echo hello'" -ForegroundColor Gray
+Write-Host "  Manager:      .\bin\manager.exe" -ForegroundColor Gray
+Write-Host "  Worker:       .\bin\worker.exe --id worker-1 --port 8081" -ForegroundColor Gray
+Write-Host "  Orchestrator: .\bin\orchestrator.exe" -ForegroundColor Gray
