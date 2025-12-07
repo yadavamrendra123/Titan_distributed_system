@@ -58,6 +58,15 @@ go build -o bin\worker.exe .\cmd\worker
 
 ### Running the Cluster
 
+**Option 1: Automated Fractal Demo (Recommended)**
+Witness the power of distributed computing by rendering a high-res Mandelbrot set.
+```powershell
+.\demo_fractal.ps1
+```
+*Spins up 4 workers and renders a 4K fractal image in parallel.*
+
+**Option 2: Manual Start**
+
 **Terminal 1 - Start Manager:**
 ```powershell
 .\bin\manager.exe
