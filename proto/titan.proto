@@ -1,0 +1,139 @@
+syntax = "proto3";
+
+package titan;
+
+option go_package = "github.com/yourusername/titan/proto";
+
+// ============================================
+// Manager Service (Control Plane)
+// ============================================
+
+service ManagerService {
+  // Submit a new job to the cluster
+  rpc SubmitJob(JobRequest) returns (JobResponse);
+  
+  // Query the status of a specific job
+  rpc GetJobStatus(JobStatusRequest) returns (JobStatusResponse);
+  
+  // List all jobs in the cluster
+  rpc ListJobs(ListJobsRequest) returns (ListJobsResponse);
+}
+
+message JobRequest {
+  string command = 1;           // Shell command to execute
+  map<string, string> env = 2;  // Environment variables
+  ResourceRequirements resources = 3;
+}
+
+message ResourceRequirements {
+  int32 cpu_millicores = 1;  // 1000 = 1 CPU core
+  int64 memory_mb = 2;        // Memory in megabytes
+}
+
+message JobResponse {
+  string job_id = 1;
+  string status = 2;  // PENDING, SCHEDULED, RUNNING, COMPLETED, FAILED
+}
+
+message JobStatusRequest {
+  string job_id = 1;
+}
+
+message JobStatusResponse {
+  string job_id = 1;
+  string status = 2;
+  string worker_id = 3;  // Which worker is/was running this task
+  string output = 4;     // Stdout from the task
+  int32 exit_code = 5;
+}
+
+message ListJobsRequest {
+  // Future: Add pagination
+}
+
+message ListJobsResponse {
+  repeated JobStatusResponse jobs = 1;
+}
+
+// ============================================
+// Worker Service (Data Plane)
+// ============================================
+
+service WorkerService {
+  // Manager -> Worker: Register with the cluster
+  rpc RegisterWorker(WorkerInfo) returns (RegistrationResponse);
+  
+  // Manager -> Worker: Send heartbeat to prove liveness
+  rpc Heartbeat(HeartbeatRequest) returns (HeartbeatResponse);
+  
+  // Manager -> Worker: Start a task
+  rpc StartTask(TaskRequest) returns (TaskResponse);
+  
+  // Manager -> Worker: Stop a running task
+  rpc StopTask(StopTaskRequest) returns (StopTaskResponse);
+  
+  // Worker -> Manager: Report task status updates
+  rpc ReportTaskStatus(TaskStatusUpdate) returns (Ack);
+}
+
+message WorkerInfo {
+  string worker_id = 1;
+  string address = 2;  // IP:Port for RPC
+  ResourceCapacity capacity = 3;
+}
+
+message ResourceCapacity {
+  int32 total_cpu_millicores = 1;
+  int64 total_memory_mb = 2;
+}
+
+message RegistrationResponse {
+  bool accepted = 1;
+  string message = 2;
+}
+
+message HeartbeatRequest {
+  string worker_id = 1;
+  int64 timestamp = 2;  // Unix timestamp
+  ResourceUsage current_usage = 3;
+}
+
+message ResourceUsage {
+  int32 used_cpu_millicores = 1;
+  int64 used_memory_mb = 2;
+}
+
+message HeartbeatResponse {
+  bool acknowledged = 1;
+}
+
+message TaskRequest {
+  string task_id = 1;
+  string job_id = 2;
+  string command = 3;
+  map<string, string> env = 4;
+}
+
+message TaskResponse {
+  bool accepted = 1;
+  string message = 2;
+}
+
+message StopTaskRequest {
+  string task_id = 1;
+}
+
+message StopTaskResponse {
+  bool stopped = 1;
+}
+
+message TaskStatusUpdate {
+  string task_id = 1;
+  string status = 2;  // RUNNING, COMPLETED, FAILED
+  string output = 3;
+  int32 exit_code = 4;
+}
+
+message Ack {
+  bool ok = 1;
+}

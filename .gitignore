@@ -1,0 +1,45 @@
+# Titan - Distributed Job Scheduler
+
+## .gitignore
+
+# Binaries
+bin/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary
+*.test
+
+# Output of the go coverage tool
+*.out
+
+# Go workspace file
+go.work
+
+# Dependency directories
+vendor/
+
+# Generated protobuf code (commented to allow pre-generated code for Windows)
+# pkg/proto/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Data and logs
+data/
+*.log
+
+# Temporary files
+tmp/
+temp/
